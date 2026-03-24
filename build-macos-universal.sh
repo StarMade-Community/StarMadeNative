@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Universal (arm64 + x86_64) libStarMadeNative.dylib using clang from Xcode Command Line Tools.
 # One fat binary for Apple Silicon (arm64) and Intel Macs (x86_64).
-# Requires JAVA_HOME (e.g. same JDK as the game). Headers must match the JVM that loads the library.
+# Requires JAVA_HOME (Java 21+, ideally same JDK major as the game runtime).
+# Headers should match the JVM major version that loads the library.
 set -eo pipefail
 
 JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home 2>/dev/null || true)}"

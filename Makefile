@@ -1,4 +1,4 @@
-# StarMade targets Java 25 — JNI headers must match the JDK used to run the game.
+# StarMade targets Java 21 — JNI headers must match the JDK used to run the game.
 # Set JAVA_HOME, or pass JAVADIR= / JAVAOSDIR= on the make command line (Gradle does this).
 JAVADIR ?= $(JAVA_HOME)/include
 JAVAOSDIR ?= $(JAVA_HOME)/include/linux
@@ -15,9 +15,9 @@ all: generate
 
 generate:
 	@if [ -z "$(strip $(JAVADIR))" ] || [ -z "$(strip $(JAVAOSDIR))" ]; then \
-		echo "Error: set JAVA_HOME to JDK 25+ or pass JAVADIR and JAVAOSDIR to make."; exit 1; \
+		echo "Error: set JAVA_HOME to JDK 21+ or pass JAVADIR and JAVAOSDIR to make."; exit 1; \
 	fi
-	@test -f "$(JAVADIR)/jni.h" || (echo "Error: jni.h not found under JAVADIR=$(JAVADIR) (need JDK 25+)"; exit 1)
+	@test -f "$(JAVADIR)/jni.h" || (echo "Error: jni.h not found under JAVADIR=$(JAVADIR) (need JDK 21+)"; exit 1)
 	mkdir -p obj/Release/FastNoiseSIMD
 	mkdir -p bin/Release
 	${CC} ${OPTS} ${ARCH} -I${JAVAOSDIR} -I${JAVADIR} -c FastNoiseSIMD/FastNoiseSIMD.cpp -o obj/Release/FastNoiseSIMD/FastNoiseSIMD.o
