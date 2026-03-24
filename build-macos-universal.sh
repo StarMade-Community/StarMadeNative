@@ -27,13 +27,16 @@ COMMON_FLAGS=(
   "-I${SRC_DIR}/FastNoiseSIMD"
 )
 
-SOURCES=(
+COMMON_SOURCES=(
   "FastNoiseSIMD/FastNoiseSIMD.cpp"
   "FastNoiseSIMD/FastNoiseSIMD_internal.cpp"
+  "FastNoiseSIMD_JNI.cpp"
+)
+
+X86_SOURCES=(
   "FastNoiseSIMD/FastNoiseSIMD_sse2.cpp"
   "FastNoiseSIMD/FastNoiseSIMD_sse41.cpp"
   "FastNoiseSIMD/FastNoiseSIMD_avx2.cpp"
-  "FastNoiseSIMD_JNI.cpp"
 )
 
 build_slice() {
@@ -43,13 +46,27 @@ build_slice() {
   mkdir -p "${outdir}"
   local objects=()
   local src base obj
-  for src in "${SOURCES[@]}"; do
+
+  # Compile common sources for all architectures
+  for src in "${COMMON_SOURCES[@]}"; do
     base=$(basename "${src}" .cpp)
     obj="${outdir}/${base}.o"
     # shellcheck disable=SC2068
     clang++ -arch "${arch}" "${COMMON_FLAGS[@]}" $@ -c "${SRC_DIR}/${src}" -o "${obj}"
     objects+=("${obj}")
   done
+
+  # Compile x86-specific sources only for x86_64
+  if [[ "${arch}" == "x86_64" ]]; then
+    for src in "${X86_SOURCES[@]}"; do
+      base=$(basename "${src}" .cpp)
+      obj="${outdir}/${base}.o"
+      # shellcheck disable=SC2068
+      clang++ -arch "${arch}" "${COMMON_FLAGS[@]}" $@ -c "${SRC_DIR}/${src}" -o "${obj}"
+      objects+=("${obj}")
+    done
+  fi
+
   clang++ -arch "${arch}" -dynamiclib -mmacosx-version-min=11.0 \
     -undefined dynamic_lookup \
     "${objects[@]}" -o "${outdir}/libStarMadeNative.dylib"
