@@ -48,8 +48,8 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++11" />
 			<Add option="-fpic" />
-			<Add directory="../java/jdk1.8.0_92/include/linux" />
-			<Add directory="../java/jdk1.8.0_92/include" />
+			<Add directory="../java/jdk-25/include/linux" />
+			<Add directory="../java/jdk-25/include" />
 		</Compiler>
 		<Linker>
 			<Add option="-static-libstdc++ -static-libgcc" />

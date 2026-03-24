@@ -7,16 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B7CE84B01E44544900C31433 /* JavaVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7E622011D0E0093005327D6 /* JavaVM.framework */; };
 		B7E6220E1D0E033F005327D6 /* FastNoiseSIMD_internal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7E6220A1D0E033F005327D6 /* FastNoiseSIMD_internal.cpp */; settings = {COMPILER_FLAGS = " "; }; };
 		B7E6220F1D0E033F005327D6 /* FastNoiseSIMD_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B7E6220B1D0E033F005327D6 /* FastNoiseSIMD_internal.h */; };
 		B7E622101D0E033F005327D6 /* FastNoiseSIMD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7E6220C1D0E033F005327D6 /* FastNoiseSIMD.cpp */; };
 		B7E622111D0E033F005327D6 /* FastNoiseSIMD.h in Headers */ = {isa = PBXBuildFile; fileRef = B7E6220D1D0E033F005327D6 /* FastNoiseSIMD.h */; };
-		B7E622311D0E2174005327D6 /* FastNoiseSIMD_sse41.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7E622301D0E2174005327D6 /* FastNoiseSIMD_sse41.cpp */; settings = {COMPILER_FLAGS = "-msse4.1"; }; };
+		B7E622311D0E2174005327D6 /* FastNoiseSIMD_sse41.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B7E622301D0E2174005327D6 /* FastNoiseSIMD_sse41.cpp */; };
 		CEB506DF1D2C7FC700AD90CC /* FastNoiseSIMD_JNI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB506DD1D2C7FC700AD90CC /* FastNoiseSIMD_JNI.cpp */; };
 		CEB506E01D2C7FC700AD90CC /* FastNoiseSIMD_JNI.h in Headers */ = {isa = PBXBuildFile; fileRef = CEB506DE1D2C7FC700AD90CC /* FastNoiseSIMD_JNI.h */; };
-		CEB506E31D2C802400AD90CC /* FastNoiseSIMD_avx2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB506E11D2C802400AD90CC /* FastNoiseSIMD_avx2.cpp */; settings = {COMPILER_FLAGS = "-march=core-avx2"; }; };
-		CEB506E41D2C802400AD90CC /* FastNoiseSIMD_sse2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB506E21D2C802400AD90CC /* FastNoiseSIMD_sse2.cpp */; settings = {COMPILER_FLAGS = "-msse2"; }; };
+		CEB506E31D2C802400AD90CC /* FastNoiseSIMD_avx2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB506E11D2C802400AD90CC /* FastNoiseSIMD_avx2.cpp */; };
+		CEB506E41D2C802400AD90CC /* FastNoiseSIMD_sse2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB506E21D2C802400AD90CC /* FastNoiseSIMD_sse2.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,7 +40,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B7CE84B01E44544900C31433 /* JavaVM.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,13 +243,24 @@
 		B7E621FD1D0DFFCD005327D6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "arm64 x86_64";
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_EXTENSION = "";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(JAVA_HOME)/include",
+					"$(JAVA_HOME)/include/darwin",
+				);
 				INFOPLIST_FILE = "";
 				LLVM_LTO = NO;
 				MACH_O_TYPE = mh_dylib;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				"OTHER_CPLUSPLUSFLAGS[arch=x86_64]" = "-march=core-avx2";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-undefined",
+					dynamic_lookup,
+				);
 				PRODUCT_NAME = "lib$(TARGET_NAME).dylib";
 				SDKROOT = macosx;
 				SYMROOT = builds;
@@ -262,14 +271,25 @@
 		B7E621FE1D0DFFCD005327D6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = "arm64 x86_64";
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_EXTENSION = "";
 				GCC_OPTIMIZATION_LEVEL = fast;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(JAVA_HOME)/include",
+					"$(JAVA_HOME)/include/darwin",
+				);
 				INFOPLIST_FILE = "";
 				LLVM_LTO = NO;
 				MACH_O_TYPE = mh_dylib;
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				"OTHER_CPLUSPLUSFLAGS[arch=x86_64]" = "-march=core-avx2";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-undefined",
+					dynamic_lookup,
+				);
 				PRODUCT_NAME = "lib$(TARGET_NAME).dylib";
 				SDKROOT = macosx;
 				SYMROOT = builds;
