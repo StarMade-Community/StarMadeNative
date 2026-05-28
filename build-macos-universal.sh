@@ -40,6 +40,10 @@ X86_SOURCES=(
   "FastNoiseSIMD/FastNoiseSIMD_avx2.cpp"
 )
 
+ARM_SOURCES=(
+  "FastNoiseSIMD/FastNoiseSIMD_neon.cpp"
+)
+
 build_slice() {
   local arch="$1"
   local outdir="$2"
@@ -57,9 +61,17 @@ build_slice() {
     objects+=("${obj}")
   done
 
-  # Compile x86-specific sources only for x86_64
+  # Compile architecture-specific SIMD sources
   if [[ "${arch}" == "x86_64" ]]; then
     for src in "${X86_SOURCES[@]}"; do
+      base=$(basename "${src}" .cpp)
+      obj="${outdir}/${base}.o"
+      # shellcheck disable=SC2068
+      clang++ -arch "${arch}" "${COMMON_FLAGS[@]}" $@ -c "${SRC_DIR}/${src}" -o "${obj}"
+      objects+=("${obj}")
+    done
+  elif [[ "${arch}" == "arm64" ]]; then
+    for src in "${ARM_SOURCES[@]}"; do
       base=$(basename "${src}" .cpp)
       obj="${outdir}/${base}.o"
       # shellcheck disable=SC2068
