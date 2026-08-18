@@ -43,6 +43,14 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</WholeProgramOptimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_avx512.cpp">
+      <!-- FastNoiseSIMD.h only enables FN_COMPILE_AVX512 for _MSC_VER >= 1911 (VS2017 15.3+),
+           so this file compiles to an empty translation unit on the older v140 (VS2015) toolset,
+           which predates AVX-512 intrinsic/codegen support and doesn't understand /arch:AVX512. -->
+      <AdditionalOptions Condition="'$(PlatformToolset)'!='v140'">/arch:AVX512 %(AdditionalOptions)</AdditionalOptions>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</WholeProgramOptimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_internal.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotSet</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotSet</EnableEnhancedInstructionSet>

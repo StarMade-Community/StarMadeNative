@@ -11,6 +11,9 @@
     <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_avx2.cpp">
       <Filter>FastNoiseSIMD</Filter>
     </ClCompile>
+    <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_avx512.cpp">
+      <Filter>FastNoiseSIMD</Filter>
+    </ClCompile>
     <ClCompile Include="FastNoiseSIMD\FastNoiseSIMD_sse2.cpp">
       <Filter>FastNoiseSIMD</Filter>
     </ClCompile>

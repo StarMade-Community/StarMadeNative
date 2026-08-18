@@ -45,8 +45,12 @@
 // Note: This does not break support for pre AVX CPUs, AVX code is only run if support is detected
 #define FN_COMPILE_AVX2
 
-// Only the latest compilers will support this
-//#define FN_COMPILE_AVX512
+// Requires a compiler with AVX512F intrinsic support: GCC 5+, Clang 3.9+, MSVC 2017 15.3+ (_MSC_VER 1911+).
+// FastNoiseSIMD_avx512.cpp must be compiled with -mavx512f (GCC/Clang) or /arch:AVX512 (MSVC).
+// Note: This does not break support for non-AVX512 CPUs, AVX512 code is only run if support is detected
+#if !defined(_MSC_VER) || _MSC_VER >= 1911
+#define FN_COMPILE_AVX512
+#endif
 
 // Using FMA instructions with AVX(51)2/NEON provides a small performance increase but can cause
 // minute variations in noise output compared to other SIMD levels due to higher calculation precision

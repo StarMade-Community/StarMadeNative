@@ -34,10 +34,18 @@ COMMON_SOURCES=(
   "FastNoiseSIMD_JNI.cpp"
 )
 
+# FastNoiseSIMD dispatches to hand-written SSE2/SSE4.1/AVX2/AVX512 code paths at
+# runtime via CPUID, so each ISA-specific file gets ONLY the instruction-set flag
+# it needs (matching the per-file flags in StarMadeNative.cbp/.vcxproj). Building
+# all of them with one blanket -march would let the compiler emit e.g. AVX
+# instructions inside the "SSE2 fallback" object file, which then crashes with
+# SIGILL on any Mac whose CPU doesn't support AVX — exactly the case that
+# fallback exists to handle.
 X86_SOURCES=(
-  "FastNoiseSIMD/FastNoiseSIMD_sse2.cpp"
-  "FastNoiseSIMD/FastNoiseSIMD_sse41.cpp"
-  "FastNoiseSIMD/FastNoiseSIMD_avx2.cpp"
+  "FastNoiseSIMD/FastNoiseSIMD_sse2.cpp:-msse2"
+  "FastNoiseSIMD/FastNoiseSIMD_sse41.cpp:-msse4.1"
+  "FastNoiseSIMD/FastNoiseSIMD_avx2.cpp:-march=core-avx2"
+  "FastNoiseSIMD/FastNoiseSIMD_avx512.cpp:-mavx512f"
 )
 
 ARM_SOURCES=(
@@ -47,35 +55,33 @@ ARM_SOURCES=(
 build_slice() {
   local arch="$1"
   local outdir="$2"
-  shift 2
   mkdir -p "${outdir}"
   local objects=()
-  local src base obj
+  local src base obj isa_flag
 
   # Compile common sources for all architectures
   for src in "${COMMON_SOURCES[@]}"; do
     base=$(basename "${src}" .cpp)
     obj="${outdir}/${base}.o"
-    # shellcheck disable=SC2068
-    clang++ -arch "${arch}" "${COMMON_FLAGS[@]}" $@ -c "${SRC_DIR}/${src}" -o "${obj}"
+    clang++ -arch "${arch}" "${COMMON_FLAGS[@]}" -c "${SRC_DIR}/${src}" -o "${obj}"
     objects+=("${obj}")
   done
 
-  # Compile architecture-specific SIMD sources
+  # Compile architecture-specific SIMD sources, each with only its own ISA flag
   if [[ "${arch}" == "x86_64" ]]; then
-    for src in "${X86_SOURCES[@]}"; do
+    for entry in "${X86_SOURCES[@]}"; do
+      src="${entry%%:*}"
+      isa_flag="${entry#*:}"
       base=$(basename "${src}" .cpp)
       obj="${outdir}/${base}.o"
-      # shellcheck disable=SC2068
-      clang++ -arch "${arch}" "${COMMON_FLAGS[@]}" $@ -c "${SRC_DIR}/${src}" -o "${obj}"
+      clang++ -arch "${arch}" "${COMMON_FLAGS[@]}" "${isa_flag}" -c "${SRC_DIR}/${src}" -o "${obj}"
       objects+=("${obj}")
     done
   elif [[ "${arch}" == "arm64" ]]; then
     for src in "${ARM_SOURCES[@]}"; do
       base=$(basename "${src}" .cpp)
       obj="${outdir}/${base}.o"
-      # shellcheck disable=SC2068
-      clang++ -arch "${arch}" "${COMMON_FLAGS[@]}" $@ -c "${SRC_DIR}/${src}" -o "${obj}"
+      clang++ -arch "${arch}" "${COMMON_FLAGS[@]}" -c "${SRC_DIR}/${src}" -o "${obj}"
       objects+=("${obj}")
     done
   fi
@@ -86,7 +92,7 @@ build_slice() {
 }
 
 build_slice arm64 "${BUILD_DIR}/arm64"
-build_slice x86_64 "${BUILD_DIR}/x86_64" -march=core-avx2
+build_slice x86_64 "${BUILD_DIR}/x86_64"
 
 OUTPUT="${BUILD_DIR}/libStarMadeNative.dylib"
 lipo -create \

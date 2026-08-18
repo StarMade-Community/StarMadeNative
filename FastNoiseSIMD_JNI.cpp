@@ -153,40 +153,44 @@ JNIEXPORT void JNICALL Java_org_schema_game_server_controller_world_factory_plan
 	L_2_FNP(p)->SetPerturbNormaliseLength(perturbNormaliseLength);
 }
 
+// These four Fill* bindings run once per noise layer per terrain chunk request (a hot path -
+// see NoiseBuffers/TerrainGenerator* on the Java side), and make no other JNI calls between
+// acquiring and releasing the array, so GetPrimitiveArrayCritical is safe here and avoids the
+// extra copy GetFloatArrayElements is otherwise free to make on every call.
 JNIEXPORT void JNICALL Java_org_schema_game_server_controller_world_factory_planet_FastNoiseSIMD_NativeFillNoiseSet(JNIEnv* jEnv, jclass, jlong p, jfloatArray noiseSet, jint xStart, jint yStart, jint zStart, jint xSize, jint ySize, jint zSize)
 {
-	float* arrayP = jEnv->GetFloatArrayElements(noiseSet, nullptr);
+	float* arrayP = static_cast<float*>(jEnv->GetPrimitiveArrayCritical(noiseSet, nullptr));
 
 	L_2_FNP(p)->FillNoiseSet(arrayP, xStart, yStart, zStart, xSize, ySize, zSize);
 
-	jEnv->ReleaseFloatArrayElements(noiseSet, arrayP, 0);
+	jEnv->ReleasePrimitiveArrayCritical(noiseSet, arrayP, 0);
 }
 
 JNIEXPORT void JNICALL Java_org_schema_game_server_controller_world_factory_planet_FastNoiseSIMD_NativeFillSampledNoiseSet(JNIEnv* jEnv, jclass, jlong p, jfloatArray noiseSet, jint xStart, jint yStart, jint zStart, jint xSize, jint ySize, jint zSize, jint sampleScale)
 {
-	float* arrayP = static_cast<float*>(jEnv->GetFloatArrayElements(noiseSet, nullptr));
+	float* arrayP = static_cast<float*>(jEnv->GetPrimitiveArrayCritical(noiseSet, nullptr));
 
 	L_2_FNP(p)->FillSampledNoiseSet(arrayP, xStart, yStart, zStart, xSize, ySize, zSize, sampleScale);
 
-	jEnv->ReleaseFloatArrayElements(noiseSet, arrayP, 0);
+	jEnv->ReleasePrimitiveArrayCritical(noiseSet, arrayP, 0);
 }
 
 JNIEXPORT void JNICALL Java_org_schema_game_server_controller_world_factory_planet_FastNoiseSIMD_NativeFillNoiseSetVector(JNIEnv* jEnv, jclass, jlong p, jfloatArray noiseSet, jlong pVS, jfloat xOffset, jfloat yOffset, jfloat zOffset)
 {
-	float* arrayP = static_cast<float*>(jEnv->GetFloatArrayElements(noiseSet, nullptr));
+	float* arrayP = static_cast<float*>(jEnv->GetPrimitiveArrayCritical(noiseSet, nullptr));
 
 	L_2_FNP(p)->FillNoiseSet(arrayP, L_2_VSP(pVS), xOffset, yOffset, zOffset);
 
-	jEnv->ReleaseFloatArrayElements(noiseSet, arrayP, 0);
+	jEnv->ReleasePrimitiveArrayCritical(noiseSet, arrayP, 0);
 }
 
 JNIEXPORT void JNICALL Java_org_schema_game_server_controller_world_factory_planet_FastNoiseSIMD_NativeFillSampledNoiseSetVector(JNIEnv* jEnv, jclass, jlong p, jfloatArray noiseSet, jlong pVS, jfloat xOffset, jfloat yOffset, jfloat zOffset)
 {
-	float* arrayP = static_cast<float*>(jEnv->GetFloatArrayElements(noiseSet, nullptr));
+	float* arrayP = static_cast<float*>(jEnv->GetPrimitiveArrayCritical(noiseSet, nullptr));
 
 	L_2_FNP(p)->FillSampledNoiseSet(arrayP, L_2_VSP(pVS), xOffset, yOffset, zOffset);
 
-	jEnv->ReleaseFloatArrayElements(noiseSet, arrayP, 0);
+	jEnv->ReleasePrimitiveArrayCritical(noiseSet, arrayP, 0);
 }
 
 JNIEXPORT jlong JNICALL Java_org_schema_game_server_controller_world_factory_planet_FastNoiseSIMD_NewVectorSet(JNIEnv* jEnv, jclass, jint samplingScale, jfloatArray arraySet, jint sampleSizeX, jint sampleSizeY, jint sampleSizeZ)
@@ -195,12 +199,12 @@ JNIEXPORT jlong JNICALL Java_org_schema_game_server_controller_world_factory_pla
 
 	int size = static_cast<int>(jEnv->GetArrayLength(arraySet));
 
-	float* data = jEnv->GetFloatArrayElements(arraySet, nullptr);
+	float* data = static_cast<float*>(jEnv->GetPrimitiveArrayCritical(arraySet, nullptr));
 
 	float* dataCopy = new float[size];
 	memcpy(dataCopy, data, size * sizeof(float));
 
-	jEnv->ReleaseFloatArrayElements(arraySet, data, JNI_ABORT);
+	jEnv->ReleasePrimitiveArrayCritical(arraySet, data, JNI_ABORT);
 
 	vectorSet->size = size / 3;
 	vectorSet->sampleScale = static_cast<int>(samplingScale);
